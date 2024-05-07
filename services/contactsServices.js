@@ -5,7 +5,7 @@ import { nanoid } from 'nanoid';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const contactsPath = path.join(__dirname, '../db', 'contacts.json');
+const contactsPath = path.join(__dirname, '..', 'db', 'contacts.json');
 
 export async function listContacts() {
   const contacts = await fs.readFile(contactsPath, 'utf-8');
