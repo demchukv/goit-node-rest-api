@@ -1,7 +1,4 @@
 import express from "express";
-import validateBody  from "../helpers/validateBody.js";
-import * as schema from "../schemas/contactsSchemas.js";
-
 
 import {
   getAllContacts,
@@ -19,8 +16,8 @@ contactsRouter.get("/:id", getOneContact);
 
 contactsRouter.delete("/:id", deleteContact);
 
-contactsRouter.post("/", validateBody(schema.createContactSchema), createContact);
+contactsRouter.post("/", createContact);
 
-contactsRouter.put("/:id", validateBody(schema.updateContactSchema), updateContact);
+contactsRouter.put("/:id", updateContact);
 
 export default contactsRouter;
