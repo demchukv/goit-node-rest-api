@@ -72,7 +72,7 @@ export const updateContact = async (req, res, next) => {
 };
 
 export const updateStatusContact = async (req, res, next) => {
-  if(!req.body.favorite || typeof req.body.favorite !== 'boolean') {
+  if(Object.keys(req.body).length !== 1 || typeof req.body.favorite !== 'boolean') {
     return res.status(400).json({
         message: "Body must have one boolean field: favorite",
       });
