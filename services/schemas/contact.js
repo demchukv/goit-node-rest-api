@@ -8,18 +8,16 @@ const contactsShema = new Schema({
   },
   email: {
     type: String,
-    required: [true, "Set email for contact"],
   },
   phone: {
     type: String,
-    required: [true, "Set phone for contact"],
   },
   favorite: {
     type: Boolean,
     default: false,
   },
 },
-{ versionKey: false, timestamps: true }
+{ versionKey: false, timestamps: false }
 );
 
 export const Contact = mongoose.model("Contact", contactsShema);
