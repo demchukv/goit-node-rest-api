@@ -21,5 +21,5 @@ export async function updateContact(contactId, body) {
 }
 
 export async function updateStatusContact(contactId, body) {
-  return Contact.findByIdAndUpdate({ _id: contactId }, body);
+  return Contact.findByIdAndUpdate({ _id: contactId }, body, {returnDocument: "after"});
 }
