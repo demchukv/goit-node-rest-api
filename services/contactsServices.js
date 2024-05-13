@@ -17,7 +17,7 @@ export async function addContact(name, email, phone) {
 }
 
 export async function updateContact(contactId, body) {
-  return Contact.findByIdAndUpdate({ _id: contactId }, body);
+   return Contact.findByIdAndUpdate({ _id: contactId }, body, {returnDocument: "after"});
 }
 
 export async function updateStatusContact(contactId, body) {
