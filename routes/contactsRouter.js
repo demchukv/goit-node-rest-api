@@ -1,4 +1,8 @@
 import express from "express";
+import validateBody  from "../helpers/validateBody.js";
+import * as schema from "../services/schemas/contact.js";
+import auth from "../helpers/auth.js";
+
 
 import {
   getAllContacts,
@@ -11,16 +15,16 @@ import {
 
 const contactsRouter = express.Router();
 
-contactsRouter.get("/", getAllContacts);
+contactsRouter.get("/", auth, getAllContacts);
 
-contactsRouter.get("/:id", getOneContact);
+contactsRouter.get("/:id", auth, getOneContact);
 
-contactsRouter.delete("/:id", deleteContact);
+contactsRouter.delete("/:id", auth, deleteContact);
 
-contactsRouter.post("/", createContact);
+contactsRouter.post("/", auth, validateBody(schema.createContactSchema), createContact);
 
-contactsRouter.put("/:id", updateContact);
+contactsRouter.put("/:id", auth, validateBody(schema.updateContactSchema), updateContact);
 
-contactsRouter.patch("/:id/favorite", updateStatusContact);
+contactsRouter.patch("/:id/favorite", auth, updateStatusContact);
 
 export default contactsRouter;
