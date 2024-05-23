@@ -14,7 +14,7 @@ export const register = async (req, res, next) => {
   }
   try {
     const newUser = new User({ username, email });
-    newUser.setPassword(password);
+    await newUser.setPassword(password);
     await newUser.save();
     res.status(201).json({
       user: {

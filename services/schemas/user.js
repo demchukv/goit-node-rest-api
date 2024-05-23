@@ -39,19 +39,11 @@ userSchema.methods.validPassword = async function (password) {
 export const User = mongoose.model("User", userSchema);
 
 export const userValidateSchema = Joi.object({
-  password: Joi.string()
-      .min(6)
-      .max(15)
-      .required(),
-  email: Joi.string()
-      .email({ minDomainSegments: 2 })
-      .required(),
-  subscription: Joi.string()
-      .valid("starter", "pro", "business"),
-})
+  password: Joi.string().pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")).required(),
+  email: Joi.string().email({ minDomainSegments: 2 }).required(),
+  subscription: Joi.string().valid("starter", "pro", "business"),
+});
 
 export const userValidateSubscription = Joi.object({
-  subscription: Joi.string()
-  .valid("starter", "pro", "business")
-  .required(),
-})
+  subscription: Joi.string().valid("starter", "pro", "business").required(),
+});
