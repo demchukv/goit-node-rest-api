@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import bCrypt from "bcrypt";
 import Joi from "joi";
+import gravatar from "gravatar";
 
 const { Schema } = mongoose;
 
@@ -24,6 +25,10 @@ const userSchema = new Schema(
       type: String,
       default: null,
     },
+    avatarURL: {
+      type: String,
+      default: null,
+    }
   },
   { versionKey: false, timestamps: true }
 );
@@ -35,6 +40,10 @@ userSchema.methods.setPassword = async function (password) {
 userSchema.methods.validPassword = async function (password) {
   return await bCrypt.compare(password, this.password);
 };
+
+userSchema.methods.setAvatarURL = async function (email) {
+  this.avatarURL = gravatar.url(email, {s: '250'});
+}
 
 export const User = mongoose.model("User", userSchema);
 

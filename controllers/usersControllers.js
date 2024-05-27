@@ -1,8 +1,14 @@
 import * as usersServices from "../services/usersServices.js";
 import { User } from "../services/schemas/user.js";
 import jwt from "jsonwebtoken";
+import path from "path";
+import fs from "fs/promises";
+import Jimp from "jimp";
+import { getAvatarName } from "../helpers/upload.js";
 
 const secret = process.env.SECRET;
+
+const storeAvatar = path.join(process.cwd(), 'public',  'avatars');
 
 export const register = async (req, res, next) => {
   const { username, email, password } = req.body;
@@ -15,6 +21,7 @@ export const register = async (req, res, next) => {
   try {
     const newUser = new User({ username, email });
     await newUser.setPassword(password);
+    await newUser.setAvatarURL(email);
     await newUser.save();
     res.status(201).json({
       user: {
@@ -89,7 +96,7 @@ export const updateSubscription = async (req, res, next) => {
       });
   }
   try {
-    const data = await usersServices.updateSubscription(
+    const data = await usersServices.updateUser(
       req.user._id,
       req.body
     );
@@ -104,3 +111,48 @@ export const updateSubscription = async (req, res, next) => {
     next(error);
   }
 };
+
+
+export const updateAvatar = async (req, res, next) => {
+  const { path: tempUpload, originalname } = req.file;
+  const { _id } = req.user;
+  const filename = getAvatarName(_id, originalname);
+  const resultUpload = path.join(storeAvatar, filename);
+
+  try{
+    await fs.rename(tempUpload, resultUpload);
+  }catch(error){
+    console.error(error);
+    next(error);
+  }
+
+  Jimp.read(resultUpload)
+  .then((image) => {
+    return image
+      .contain(250, 250)
+      .quality(75)
+      .write(resultUpload);
+  })
+  .catch((err) => {
+    console.error(err);
+    next(err);
+  });
+
+  try {
+    const data = await usersServices.updateUser(
+      _id,
+      {
+        avatarURL: `avatars/${filename}`,
+      }
+    );
+    if (!data) {
+      return res.status(404).json({
+        message: "Not found",
+      });
+    }
+    return res.json({avatarURL: `avatars/${filename}`});
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+}

@@ -12,6 +12,6 @@ export async function setUserToken(id, token) {
   return User.findByIdAndUpdate({ _id: id }, token);
 }
 
-export async function updateSubscription(userId, body) {
+export async function updateUser(userId, body) {
   return User.findByIdAndUpdate({ _id: userId }, body, {new: true});
 }

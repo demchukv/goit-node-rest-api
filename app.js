@@ -2,15 +2,20 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import mongoose from "mongoose";
-
+import path from "path";
+import { createFolderIsNotExist } from "./helpers/upload.js";
 import usersRouter from "./routes/usersRouter.js";
 import contactsRouter from "./routes/contactsRouter.js";
+
+const uploadDir = path.join(process.cwd(), 'tmp');
+const storeAvatar = path.join(process.cwd(), 'public',  'avatars');
 
 const app = express();
 
 app.use(morgan("tiny"));
 app.use(cors());
 app.use(express.json());
+app.use(express.static("public"));
 
 app.use("/api/users", usersRouter);
 app.use("/api/contacts", contactsRouter);
@@ -29,9 +34,12 @@ const uriDb = process.env.DB_HOST;
 
 const connection = mongoose.connect(uriDb);
 
+
 connection
   .then(() => {
-    app.listen(PORT, function () {
+    app.listen(PORT, async function () {
+      createFolderIsNotExist(uploadDir);
+      createFolderIsNotExist(storeAvatar);
       console.log(`Database connection successful`);
     });
   })
