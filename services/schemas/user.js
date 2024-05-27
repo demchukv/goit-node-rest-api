@@ -28,7 +28,7 @@ const userSchema = new Schema(
     avatarURL: {
       type: String,
       default: null,
-    }
+    },
   },
   { versionKey: false, timestamps: true }
 );
@@ -42,8 +42,8 @@ userSchema.methods.validPassword = async function (password) {
 };
 
 userSchema.methods.setAvatarURL = async function (email) {
-  this.avatarURL = gravatar.url(email, {s: '250'});
-}
+  this.avatarURL = gravatar.url(email, { s: "250" });
+};
 
 export const User = mongoose.model("User", userSchema);
 

@@ -14,11 +14,15 @@ export const getAllContacts = async (req, res, next) => {
 
 export const getOneContact = async (req, res, next) => {
   try {
-    const owner = req.user._id;
     const data = await contactsServices.getContactById(req.params.id);
     if (!data) {
       return res.status(404).json({
         message: "Not found",
+      });
+    }
+    if (data.owner.toString() !== req.user._id) {
+      return res.status(403).json({
+        message: "Forbidden",
       });
     }
     return res.json(data);

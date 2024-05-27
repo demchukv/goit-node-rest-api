@@ -2,39 +2,39 @@ import path from "path";
 import multer from "multer";
 import fs from "fs/promises";
 
-const uploadDir = path.join(process.cwd(), 'tmp');
+const uploadDir = path.join(process.cwd(), "tmp");
 
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, uploadDir);
-    },
-    filename: (req, file, cb) => {
-      cb(null, file.originalname);
-    },
-    limits: {
-      fileSize: 1048576,
-    },
-  });
-  
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  },
+  limits: {
+    fileSize: 1048576,
+  },
+});
+
 export const upload = multer({
-    storage: storage,
-  });
+  storage: storage,
+});
 
 export const isAccessible = (path) => {
-    return fs
-      .access(path)
-      .then(() => true)
-      .catch(() => false)
-  }
-  
+  return fs
+    .access(path)
+    .then(() => true)
+    .catch(() => false);
+};
+
 export const createFolderIsNotExist = async (folder) => {
-    if (!(await isAccessible(folder))) {
-      await fs.mkdir(folder)
-    }
+  if (!(await isAccessible(folder))) {
+    await fs.mkdir(folder);
   }
+};
 
 export const getAvatarName = (id, originalname) => {
-  const fileParts = originalname.split('.');
+  const fileParts = originalname.split(".");
   const ext = fileParts[fileParts.length - 1];
-  return `${id}.${ext}`;  
-}
+  return `${id}.${ext}`;
+};

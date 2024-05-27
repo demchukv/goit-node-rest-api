@@ -8,7 +8,7 @@ import { getAvatarName } from "../helpers/upload.js";
 
 const secret = process.env.SECRET;
 
-const storeAvatar = path.join(process.cwd(), 'public',  'avatars');
+const storeAvatar = path.join(process.cwd(), "public", "avatars");
 
 export const register = async (req, res, next) => {
   const { username, email, password } = req.body;
@@ -64,9 +64,9 @@ export const login = async (req, res, next) => {
 };
 
 export const logout = async (req, res, next) => {
-  const {_id} = req.user;
+  const { _id } = req.user;
   try {
-    await usersServices.setUserToken(_id, {token: null});
+    await usersServices.setUserToken(_id, { token: null });
     res.status(204).json({});
   } catch (error) {
     console.error(error);
@@ -75,7 +75,7 @@ export const logout = async (req, res, next) => {
 };
 
 export const current = async (req, res, next) => {
-  const {_id} = req.user;
+  const { _id } = req.user;
   try {
     const user = await usersServices.findUserById(_id);
     res.json({
@@ -88,18 +88,17 @@ export const current = async (req, res, next) => {
   }
 };
 
-
 export const updateSubscription = async (req, res, next) => {
-  if(Object.keys(req.body).length !== 1 || Object.keys(req.body)[0] !== "subscription") {
+  if (
+    Object.keys(req.body).length !== 1 ||
+    Object.keys(req.body)[0] !== "subscription"
+  ) {
     return res.status(400).json({
-        message: "Body must have one field: subscription",
-      });
+      message: "Body must have one field: subscription",
+    });
   }
   try {
-    const data = await usersServices.updateUser(
-      req.user._id,
-      req.body
-    );
+    const data = await usersServices.updateUser(req.user._id, req.body);
     if (!data) {
       return res.status(404).json({
         message: "Not found",
@@ -112,47 +111,41 @@ export const updateSubscription = async (req, res, next) => {
   }
 };
 
-
 export const updateAvatar = async (req, res, next) => {
   const { path: tempUpload, originalname } = req.file;
   const { _id } = req.user;
   const filename = getAvatarName(_id, originalname);
   const resultUpload = path.join(storeAvatar, filename);
 
-  try{
+  try {
     await fs.rename(tempUpload, resultUpload);
-  }catch(error){
+  } catch (error) {
     console.error(error);
     next(error);
   }
 
   Jimp.read(resultUpload)
-  .then((image) => {
-    return image
-      .contain(250, 250)
-      .quality(75)
-      .write(resultUpload);
-  })
-  .catch((err) => {
-    console.error(err);
-    next(err);
-  });
+    .then((image) => {
+      return image.contain(250, 250).quality(75).write(resultUpload);
+    })
+    .catch((err) => {
+      console.error(err);
+      next(err);
+    });
 
   try {
-    const data = await usersServices.updateUser(
-      _id,
-      {
-        avatarURL: `avatars/${filename}`,
-      }
-    );
+    const data = await usersServices.updateUser(_id, {
+      avatarURL: `avatars/${filename}`,
+    });
     if (!data) {
       return res.status(404).json({
         message: "Not found",
       });
     }
-    return res.json({avatarURL: `avatars/${filename}`});
+    return res.json({ avatarURL: `avatars/${filename}` });
   } catch (error) {
+    await fs.rm(resultUpload);
     console.error(error);
     next(error);
   }
-}
+};

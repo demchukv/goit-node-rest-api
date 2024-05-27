@@ -7,8 +7,8 @@ import { createFolderIsNotExist } from "./helpers/upload.js";
 import usersRouter from "./routes/usersRouter.js";
 import contactsRouter from "./routes/contactsRouter.js";
 
-const uploadDir = path.join(process.cwd(), 'tmp');
-const storeAvatar = path.join(process.cwd(), 'public',  'avatars');
+const uploadDir = path.join(process.cwd(), "tmp");
+const storeAvatar = path.join(process.cwd(), "public", "avatars");
 
 const app = express();
 
@@ -33,7 +33,6 @@ const PORT = process.env.PORT || 3000;
 const uriDb = process.env.DB_HOST;
 
 const connection = mongoose.connect(uriDb);
-
 
 connection
   .then(() => {

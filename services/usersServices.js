@@ -13,5 +13,5 @@ export async function setUserToken(id, token) {
 }
 
 export async function updateUser(userId, body) {
-  return User.findByIdAndUpdate({ _id: userId }, body, {new: true});
+  return User.findByIdAndUpdate({ _id: userId }, body, { new: true });
 }
