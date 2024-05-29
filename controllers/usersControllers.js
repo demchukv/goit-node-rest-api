@@ -4,7 +4,6 @@ import jwt from "jsonwebtoken";
 import path from "path";
 import fs from "fs/promises";
 import Jimp from "jimp";
-import { getAvatarName } from "../helpers/upload.js";
 
 const secret = process.env.SECRET;
 
@@ -114,30 +113,27 @@ export const updateSubscription = async (req, res, next) => {
 export const updateAvatar = async (req, res, next) => {
   const { path: tempUpload, originalname } = req.file;
   const { _id } = req.user;
-  const filename = getAvatarName(_id, originalname);
+  const extension = path.extname(originalname);
+  const filename = `${id}${extension}`;
   const resultUpload = path.join(storeAvatar, filename);
 
-  try {
-    await fs.rename(tempUpload, resultUpload);
-  } catch (error) {
-    console.error(error);
-    next(error);
-  }
-
-  Jimp.read(resultUpload)
+  Jimp.read(tempUpload)
     .then((image) => {
-      return image.contain(250, 250).quality(75).write(resultUpload);
+      return image.cover(250, 250).quality(75).write(tempUpload);
     })
     .catch((err) => {
       console.error(err);
       next(err);
     });
 
+  await fs.rename(tempUpload, resultUpload);
+
   try {
     const data = await usersServices.updateUser(_id, {
       avatarURL: `avatars/${filename}`,
     });
     if (!data) {
+      await fs.rm(resultUpload);
       return res.status(404).json({
         message: "Not found",
       });

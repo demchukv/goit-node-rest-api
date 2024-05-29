@@ -32,9 +32,3 @@ export const createFolderIsNotExist = async (folder) => {
     await fs.mkdir(folder);
   }
 };
-
-export const getAvatarName = (id, originalname) => {
-  const fileParts = originalname.split(".");
-  const ext = fileParts[fileParts.length - 1];
-  return `${id}.${ext}`;
-};
