@@ -1,68 +1,36 @@
-// login.test.js
-import { login } from '../controllers/usersControllers.js';
-// const { login } = require('../controllers/usersControllers.js'); // Замініть шлях на свій
-// import { findUser } from '../services/usersServices.js';
-// const { findUser } = require('../services/usersServices.js'); // Замініть шлях на свій
+import request from 'supertest';
+import app from '../app'; // Шлях до вашого файлу app.js
 
-jest.mock('../services/schemas/user.js', () => ({
-  User: {
-    findOne: jest.fn(),
-  },
-}));
-
-describe('login function', () => {
-  it('should return a token when valid email and password are provided', async () => {
-    const req = {
-      body: {
-        email: 'test@example.com',
-        password: 'secret',
-      },
-    };
-    const res = {
-      status: jest.fn(),
-      json: jest.fn(),
+describe('POST /login', () => {
+  it('should login user and return token', async () => {
+    const userData = {
+      email: 'user@example.com',
+      password: 'password123',
     };
 
-    // Мокуємо функцію findUser
-    const mockUser = {
-      _id: 'someUserId',
-      email: 'test@example.com',
-      validPassword: jest.fn(() => true),
-    };
-    User.findOne.mockResolvedValue(mockUser);
+    const response = await request(app)
+      .post('/login')
+      .send(userData);
 
-    await login(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({
-      token: expect.any(String),
-      user: expect.objectContaining({
-        email: 'test@example.com',
-        subscription: expect.any(String),
-      }),
+    expect(response.statusCode).toBe(200);
+    expect(response.body.token).toBeDefined();
+    expect(response.body.user).toEqual({
+      email: userData.email,
+      subscription: 'starter', // або інший тип підписки, який очікується
     });
   });
 
-  it('should return 401 if invalid email or password is provided', async () => {
-    const req = {
-      body: {
-        email: 'invalid@example.com',
-        password: 'wrongpassword',
-      },
-    };
-    const res = {
-      status: jest.fn(),
-      json: jest.fn(),
+  it('should return 401 for invalid credentials', async () => {
+    const userData = {
+      email: 'user@example.com',
+      password: 'wrongpassword',
     };
 
-    // Мокуємо функцію findUser, щоб повернути null
-    User.findOne.mockResolvedValue(null);
+    const response = await request(app)
+      .post('/login')
+      .send(userData);
 
-    await login(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith({
-      message: 'Email or password is wrong',
-    });
+    expect(response.statusCode).toBe(401);
+    expect(response.body.message).toBe('Email or password is wrong');
   });
 });
