@@ -115,7 +115,7 @@ export const updateAvatar = async (req, res, next) => {
   const { path: tempUpload, originalname } = req.file;
   const { _id } = req.user;
   const extension = path.extname(originalname);
-  const filename = `${id}${extension}`;
+  const filename = `${_id}${extension}`;
   const resultUpload = path.join(storeAvatar, filename);
 
   Jimp.read(tempUpload)
