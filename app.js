@@ -46,3 +46,5 @@ connection
     console.log(`Server not running. Error message: ${err.message}`);
     process.exit(1);
   });
+
+  export default app;

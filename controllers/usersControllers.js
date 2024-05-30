@@ -10,7 +10,7 @@ const secret = process.env.SECRET;
 const storeAvatar = path.join(process.cwd(), "public", "avatars");
 
 export const register = async (req, res, next) => {
-  const { username, email, password } = req.body;
+  const { email, password } = req.body;
   const user = await usersServices.findUser(email);
   if (user) {
     return res.status(409).json({
@@ -18,7 +18,7 @@ export const register = async (req, res, next) => {
     });
   }
   try {
-    const newUser = new User({ username, email });
+    const newUser = new User({ email });
     await newUser.setPassword(password);
     await newUser.setAvatarURL(email);
     await newUser.save();
@@ -37,8 +37,9 @@ export const register = async (req, res, next) => {
 export const login = async (req, res, next) => {
   const { email, password } = req.body;
   const user = await usersServices.findUser(email);
+  const verifyPassword = await user?.validPassword(password);
 
-  if (!user || !user.validPassword(password)) {
+  if (!user || !verifyPassword) {
     return res.status(401).json({
       message: "Email or password is wrong",
     });
