@@ -118,16 +118,16 @@ export const updateAvatar = async (req, res, next) => {
   const filename = `${_id}${extension}`;
   const resultUpload = path.join(storeAvatar, filename);
 
-  Jimp.read(tempUpload)
+  await fs.rename(tempUpload, resultUpload)
+
+  Jimp.read(resultUpload)
     .then((image) => {
-      return image.cover(250, 250).quality(75).write(tempUpload);
+      image.cover(250, 250).quality(75).write(resultUpload);
     })
     .catch((err) => {
       console.error(err);
       next(err);
     });
-
-  await fs.rename(tempUpload, resultUpload);
 
   try {
     const data = await usersServices.updateUser(_id, {
