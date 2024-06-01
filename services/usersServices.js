@@ -8,6 +8,10 @@ export async function findUserById(_id) {
   return User.findOne({ _id });
 }
 
+export async function findUserByVerificationToken(verificationToken) {
+  return User.findOne({ verificationToken });
+}
+
 export async function setUserToken(id, token) {
   return User.findByIdAndUpdate({ _id: id }, token);
 }

@@ -4,36 +4,33 @@ import * as schema from "../services/schemas/user.js";
 import auth from "../helpers/auth.js";
 import { upload } from "../helpers/upload.js";
 
-import {
-  register,
-  login,
-  logout,
-  current,
-  updateSubscription,
-  updateAvatar,
-} from "../controllers/usersControllers.js";
+import * as ctrl from "../controllers/usersControllers.js";
 
 const usersRouter = express.Router();
 
 usersRouter.post(
   "/register",
   validateBody(schema.userValidateSchema),
-  register
+  ctrl.register
 );
 
-usersRouter.post("/login", validateBody(schema.userValidateSchema), login);
+usersRouter.get("/verify/:verificationToken", ctrl.verifyEmail);
 
-usersRouter.post("/logout", auth, logout);
+usersRouter.post("/verify", validateBody(schema.userValidateVerifyEmail), ctrl.resendVerifyEmail);
 
-usersRouter.get("/current", auth, current);
+usersRouter.post("/login", validateBody(schema.userValidateSchema), ctrl.login);
+
+usersRouter.post("/logout", auth, ctrl.logout);
+
+usersRouter.get("/current", auth, ctrl.current);
 
 usersRouter.patch(
   "/",
   auth,
   validateBody(schema.userValidateSubscription),
-  updateSubscription
+  ctrl.updateSubscription
 );
 
-usersRouter.patch("/avatars", auth, upload.single("avatar"), updateAvatar);
+usersRouter.patch("/avatars", auth, upload.single("avatar"), ctrl.updateAvatar);
 
 export default usersRouter;

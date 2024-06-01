@@ -4,13 +4,17 @@ import jwt from "jsonwebtoken";
 import path from "path";
 import fs from "fs/promises";
 import Jimp from "jimp";
+import { sendEmail } from "../helpers/sendEmail.js";
+import { nanoid } from "nanoid";
 
-const secret = process.env.SECRET;
+const { SECRET, BASE_URI } = process.env;
 
 const storeAvatar = path.join(process.cwd(), "public", "avatars");
 
 export const register = async (req, res, next) => {
   const { email, password } = req.body;
+  const verificationToken = nanoid();
+
   const user = await usersServices.findUser(email);
   if (user) {
     return res.status(409).json({
@@ -18,10 +22,18 @@ export const register = async (req, res, next) => {
     });
   }
   try {
-    const newUser = new User({ email });
+    const newUser = new User({ email, verificationToken });
     await newUser.setPassword(password);
     await newUser.setAvatarURL(email);
     await newUser.save();
+
+    const verifyEmailData = {
+      to: email,
+      subject: "Verify email",
+      html: `<a target="_blank" href="${BASE_URI}/api/users/verify/${verificationToken}">Click verify email</a>`,
+    };
+    await sendEmail(verifyEmailData);
+
     res.status(201).json({
       user: {
         email: newUser.email,
@@ -45,12 +57,16 @@ export const login = async (req, res, next) => {
     });
   }
 
+  if (!user.verify) {
+    return res.status(401).json({ message: "Email not verified" });
+  }
+
   const payload = {
     id: user._id,
     email: user.email,
   };
 
-  const token = jwt.sign(payload, secret, { expiresIn: "1d" });
+  const token = jwt.sign(payload, SECRET, { expiresIn: "1d" });
 
   await usersServices.setUserToken(user._id, { token: token });
 
@@ -118,7 +134,7 @@ export const updateAvatar = async (req, res, next) => {
   const filename = `${_id}${extension}`;
   const resultUpload = path.join(storeAvatar, filename);
 
-  await fs.rename(tempUpload, resultUpload)
+  await fs.rename(tempUpload, resultUpload);
 
   Jimp.read(resultUpload)
     .then((image) => {
@@ -145,4 +161,52 @@ export const updateAvatar = async (req, res, next) => {
     console.error(error);
     next(error);
   }
+};
+
+export const verifyEmail = async (req, res, next) => {
+  const { verificationToken } = req.params;
+  const user = await usersServices.findUserByVerificationToken(verificationToken);
+  if (!user) {
+    return res.status(404).json({
+      message: "User not found",
+    });
+  }
+  try {
+    await usersServices.updateUser(user._id, {
+      verify: true,
+      verificationToken: null,
+    });
+    res.json({
+      message: "Verification successful",
+    });
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+};
+
+export const resendVerifyEmail = async (req, res, next) => {
+  const { email } = req.body;
+  const user = await usersServices.findUser(email);
+  if (!user) {
+    return res.status(404).json({
+      message: "User not found",
+    });
+  }
+
+  if (user.verify) {
+    return res.status(400).json({
+      message: "Verification has already been passed",
+    });
+  }
+
+  const verifyEmailData = {
+    to: user.email,
+    subject: "Verify email",
+    html: `<a target="_blank" href="${BASE_URI}/api/users/verify/${user.verificationToken}">Click verify email</a>`,
+  };
+
+  await sendEmail(verifyEmailData);
+
+  res.json({ message: "Verification email sent" });
 };
