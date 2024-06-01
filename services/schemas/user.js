@@ -36,7 +36,7 @@ const userSchema = new Schema(
     verificationToken: {
       type: String,
       default: null,
-      required: [true, 'Verify token is required'],
+      required: [true, "Verify token is required"],
     },
   },
   { versionKey: false, timestamps: true }
@@ -68,4 +68,4 @@ export const userValidateSubscription = Joi.object({
 
 export const userValidateVerifyEmail = Joi.object({
   email: Joi.string().email({ minDomainSegments: 2 }).required(),
-})
+});

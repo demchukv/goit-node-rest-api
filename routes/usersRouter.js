@@ -16,7 +16,11 @@ usersRouter.post(
 
 usersRouter.get("/verify/:verificationToken", ctrl.verifyEmail);
 
-usersRouter.post("/verify", validateBody(schema.userValidateVerifyEmail), ctrl.resendVerifyEmail);
+usersRouter.post(
+  "/verify",
+  validateBody(schema.userValidateVerifyEmail),
+  ctrl.resendVerifyEmail
+);
 
 usersRouter.post("/login", validateBody(schema.userValidateSchema), ctrl.login);
 
